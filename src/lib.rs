@@ -8,14 +8,10 @@ use hyper::Client;
 extern crate rustc_serialize;
 use rustc_serialize::json::Json;
 
-// filter out item flag 5 for cargo
-// filter out item flag 87 for drones
-// filter out ship ID 670 for pods
-
 #[derive(Debug)]
-struct Kill {
-    kill_id: u64,
-    victim_ship_type_id: u64,
+pub struct Kill {
+    pub kill_id: u64,
+    pub victim_ship_type_id: u64,
 }
 
 pub fn kills(request: ZkillRequest) {
