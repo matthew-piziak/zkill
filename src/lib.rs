@@ -10,8 +10,8 @@ use rustc_serialize::json::Json;
 
 #[derive(Debug)]
 pub struct Kill {
-    kill_id: u64,
-    victim_ship_type_id: u64,
+    pub kill_id: u64,
+    pub victim_ship_type_id: u64,
 }
 
 pub enum ZkillRequestType {
