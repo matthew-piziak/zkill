@@ -10,11 +10,22 @@ use rustc_serialize::json::Json;
 
 #[derive(Debug)]
 pub struct Kill {
-    pub kill_id: u64,
-    pub victim_ship_type_id: u64,
+    kill_id: u64,
+    victim_ship_type_id: u64,
 }
 
-pub fn kills(request: ZkillRequest) {
+pub enum ZkillRequestType {
+    Kills,
+    Losses,
+    Both,
+}
+
+pub struct ZkillRequest {
+    alliance_id: u64,
+    request_type: ZkillRequestType,
+}
+
+pub fn kills(request: ZkillRequest) -> Vec<Kill>{
     use std::io::prelude::*;
 
     let client = Client::new();
@@ -23,11 +34,13 @@ pub fn kills(request: ZkillRequest) {
     let mut response_string = String::new();
     response.read_to_string(&mut response_string).expect("Could not read response");
     let data = Json::from_str(&response_string).expect("Could not parse into JSON");
-    let kills = data.as_array().expect("Could not read as array");
-    for kill_json in kills {
+    let kills_json = data.as_array().expect("Could not read as array");
+    let mut kills = vec![];
+    for kill_json in kills_json {
         let kill = kill(kill_json.as_object().expect("Could not read as object"));
-        println!("{:?}", kill);
+        kills.push(kill);
     }
+    kills
 }
 
 fn kill(kill: &BTreeMap<String, Json>) -> Kill {
@@ -47,17 +60,6 @@ fn kill(kill: &BTreeMap<String, Json>) -> Kill {
         kill_id: kill_id,
         victim_ship_type_id: victim_ship_type_id,
     }
-}
-
-pub enum ZkillRequestType {
-    Kills,
-    Losses,
-    Both,
-}
-
-pub struct ZkillRequest {
-    alliance_id: u64,
-    request_type: ZkillRequestType,
 }
 
 impl ZkillRequest {
