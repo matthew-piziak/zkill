@@ -13,34 +13,33 @@ use rustc_serialize::json::Json;
 // filter out ship ID 670 for pods
 
 #[derive(Debug)]
-struct Loss {
+struct Kill {
     kill_id: u64,
     victim_ship_type_id: u64,
 }
 
-pub fn sound_losses() {
+pub fn kills(request: ZkillRequest) {
     use std::io::prelude::*;
 
     let client = Client::new();
-    let endpoint = endpoint(false, true, 99000739);
-    let mut response = client.get(&endpoint).send().expect("Could not read API");
+    let mut response = client.get(&request.endpoint()).send().expect("Could not read API");
 
     let mut response_string = String::new();
     response.read_to_string(&mut response_string).expect("Could not read response");
     let data = Json::from_str(&response_string).expect("Could not parse into JSON");
-    let losses = data.as_array().expect("Could not read as array");
-    for loss_json in losses {
-        let loss = loss(loss_json.as_object().expect("Could not read as object"));
-        println!("{:?}", loss);
+    let kills = data.as_array().expect("Could not read as array");
+    for kill_json in kills {
+        let kill = kill(kill_json.as_object().expect("Could not read as object"));
+        println!("{:?}", kill);
     }
 }
 
-fn loss(loss: &BTreeMap<String, Json>) -> Loss {
-    let kill_id = loss.get("killID")
+fn kill(kill: &BTreeMap<String, Json>) -> Kill {
+    let kill_id = kill.get("killID")
                       .expect("Could not read kill_id")
                       .as_u64()
                       .expect("kill_id not u64");
-    let victim = loss.get("victim")
+    let victim = kill.get("victim")
                      .expect("Could not read victim")
                      .as_object()
                      .expect("victim not object");
@@ -48,37 +47,40 @@ fn loss(loss: &BTreeMap<String, Json>) -> Loss {
                                     .expect("Could not read ship_id")
                                     .as_u64()
                                     .expect("ship_id not u64");
-    Loss {
+    Kill {
         kill_id: kill_id,
         victim_ship_type_id: victim_ship_type_id,
     }
 }
 
-fn endpoint(include_kills: bool, include_losses: bool, alliance_id: usize) -> String {
-    if !include_kills && !include_losses {
-        panic!("No results will be returned.")
-    }
-    format!("https://zkillboard.com/api/allianceID/{}{}{}",
-            alliance_id,
-            if include_kills {
-                "/kills"
-            } else {
-                ""
-            },
-            if include_losses {
-                "/losses"
-            } else {
-                ""
-            })
+pub enum ZkillRequestType {
+    Kills,
+    Losses,
+    Both,
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
+pub struct ZkillRequest {
+    alliance_id: u64,
+    request_type: ZkillRequestType,
+}
 
-    #[test]
-    fn test_sound_losses() {
-        sound_losses();
-        assert_eq!(false, true);
+impl ZkillRequest {
+    pub fn new(alliance_id: u64, request_type: ZkillRequestType) -> Self {
+        ZkillRequest {
+            alliance_id: alliance_id,
+            request_type: request_type,
+        }
+    }
+
+    pub fn endpoint(&self) -> String {
+        use ZkillRequestType::*;
+
+        format!("https://zkillboard.com/api/allianceID/{}{}",
+                self.alliance_id,
+                match self.request_type {
+                    Kills => "/kills",
+                    Losses => "/kills",
+                    Both => "/kills/losses",
+                })
     }
 }
