@@ -77,7 +77,7 @@ impl ZkillRequest {
                 self.alliance_id,
                 match self.request_type {
                     Kills => "/kills",
-                    Losses => "/kills",
+                    Losses => "/losses",
                     Both => "/kills/losses",
                 })
     }
