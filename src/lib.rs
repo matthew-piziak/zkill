@@ -25,7 +25,7 @@ pub struct ZkillRequest {
     request_type: ZkillRequestType,
 }
 
-pub fn kills(request: ZkillRequest) -> Vec<Kill>{
+pub fn kills(request: ZkillRequest) -> Vec<Kill> {
     use std::io::prelude::*;
 
     let client = Client::new();
