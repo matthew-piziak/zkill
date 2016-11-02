@@ -8,39 +8,46 @@ use hyper::Client;
 extern crate rustc_serialize;
 use rustc_serialize::json::Json;
 
+/// Represents one lost ship.
+///
+/// All IDs are EVE type IDs.
 #[derive(Debug)]
 pub struct Kill {
+    /// The unique kill ID.
     pub kill_id: u64,
+
+    /// The ship-type (hull) ID of the lost ship.
     pub victim_ship_type_id: u64,
 }
 
+/// Defines whether the zKillboard request should be for the alliance's kills,
+/// losses, or both.
 pub enum ZkillRequestType {
+    /// Retrieve records where the alliance killed a ship.
     Kills,
+    /// Retrieve records where the alliance lost a ship.
     Losses,
+    /// Retrieve records where the alliance killed or lost a ship.
     Both,
 }
 
+/// The parameters for one request to zKillboard.
 pub struct ZkillRequest {
     alliance_id: u64,
     request_type: ZkillRequestType,
 }
 
+/// Retrieves kills from zKillboard according to the parameters of the request.
 pub fn kills(request: ZkillRequest) -> Vec<Kill> {
     use std::io::prelude::*;
 
     let client = Client::new();
     let mut response = client.get(&request.endpoint()).send().expect("Could not read API");
-
     let mut response_string = String::new();
     response.read_to_string(&mut response_string).expect("Could not read response");
-    let data = Json::from_str(&response_string).expect("Could not parse into JSON");
-    let kills_json = data.as_array().expect("Could not read as array");
-    let mut kills = vec![];
-    for kill_json in kills_json {
-        let kill = kill(kill_json.as_object().expect("Could not read as object"));
-        kills.push(kill);
-    }
-    kills
+    let json = Json::from_str(&response_string).expect("Could not parse into JSON");
+    let kills = json.as_array().expect("Could not read as array");
+    kills.iter().map(|k| kill(k.as_object().expect("Could not read as object"))).collect()
 }
 
 fn kill(kill: &BTreeMap<String, Json>) -> Kill {
@@ -63,6 +70,7 @@ fn kill(kill: &BTreeMap<String, Json>) -> Kill {
 }
 
 impl ZkillRequest {
+
     pub fn new(alliance_id: u64, request_type: ZkillRequestType) -> Self {
         ZkillRequest {
             alliance_id: alliance_id,
@@ -70,6 +78,7 @@ impl ZkillRequest {
         }
     }
 
+    /// Returns the zKillboard API endpoint for the given request.
     pub fn endpoint(&self) -> String {
         use ZkillRequestType::*;
 
