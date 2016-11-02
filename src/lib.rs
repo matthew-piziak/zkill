@@ -18,6 +18,20 @@ pub struct Kill {
 
     /// The ship-type (hull) ID of the lost ship.
     pub victim_ship_type_id: u64,
+
+    /// The items associated with the ship when it was destroyed.
+    pub victim_items: Vec<Item>,
+}
+
+#[derive(Debug)]
+pub struct Item {
+    /// The EVE type ID of the item.
+    pub type_id: u64,
+
+    /// The item flag.
+    ///
+    /// Useful for telling whether an item was in cargo, for example.
+    pub flag: u64,
 }
 
 /// Defines whether the zKillboard request should be for the alliance's kills,
@@ -65,9 +79,32 @@ fn kill(kill: &BTreeMap<String, Json>) -> Kill {
                                     .expect("Could not read ship_id")
                                     .as_u64()
                                     .expect("ship_id not u64");
+    let victim_items = kill.get("items")
+                           .expect("Could not read items")
+                           .as_array()
+                           .expect("items not array")
+                           .into_iter()
+                           .map(|i| item(i.as_object().expect("item not object")))
+                           .collect();
     Kill {
         kill_id: kill_id,
         victim_ship_type_id: victim_ship_type_id,
+        victim_items: victim_items,
+    }
+}
+
+fn item(item: &BTreeMap<String, Json>) -> Item {
+    let type_id = item.get("typeID")
+                      .expect("Could not read type_id")
+                      .as_u64()
+                      .expect("type_id not u64");
+    let flag = item.get("flag")
+                   .expect("Could not read flag")
+                   .as_u64()
+                   .expect("flag not u64");
+    Item {
+        type_id: type_id,
+        flag: flag,
     }
 }
 
