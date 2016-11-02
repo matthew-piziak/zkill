@@ -25,8 +25,10 @@ pub struct Kill {
 pub enum ZkillRequestType {
     /// Retrieve records where the alliance killed a ship.
     Kills,
+
     /// Retrieve records where the alliance lost a ship.
     Losses,
+
     /// Retrieve records where the alliance killed or lost a ship.
     Both,
 }
@@ -70,7 +72,6 @@ fn kill(kill: &BTreeMap<String, Json>) -> Kill {
 }
 
 impl ZkillRequest {
-
     pub fn new(alliance_id: u64, request_type: ZkillRequestType) -> Self {
         ZkillRequest {
             alliance_id: alliance_id,
