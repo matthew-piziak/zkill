@@ -32,6 +32,12 @@ pub struct Item {
     ///
     /// Useful for telling whether an item was in cargo, for example.
     pub flag: u64,
+
+    /// How many of the item were dropped.
+    pub quantity_dropped: u64,
+
+    /// How many of the item were destroyed.
+    pub quantity_destroyed: u64,
 }
 
 /// Defines whether the zKillboard request should be for the alliance's kills,
@@ -68,24 +74,24 @@ pub fn kills(request: ZkillRequest) -> Vec<Kill> {
 
 fn kill(kill: &BTreeMap<String, Json>) -> Kill {
     let kill_id = kill.get("killID")
-                      .expect("Could not read kill_id")
-                      .as_u64()
-                      .expect("kill_id not u64");
+        .expect("Could not read kill_id")
+        .as_u64()
+        .expect("kill_id not u64");
     let victim = kill.get("victim")
-                     .expect("Could not read victim")
-                     .as_object()
-                     .expect("victim not object");
+        .expect("Could not read victim")
+        .as_object()
+        .expect("victim not object");
     let victim_ship_type_id = victim.get("shipTypeID")
-                                    .expect("Could not read ship_id")
-                                    .as_u64()
-                                    .expect("ship_id not u64");
+        .expect("Could not read ship_id")
+        .as_u64()
+        .expect("ship_id not u64");
     let victim_items = kill.get("items")
-                           .expect("Could not read items")
-                           .as_array()
-                           .expect("items not array")
-                           .into_iter()
-                           .map(|i| item(i.as_object().expect("item not object")))
-                           .collect();
+        .expect("Could not read items")
+        .as_array()
+        .expect("items not array")
+        .into_iter()
+        .map(|i| item(i.as_object().expect("item not object")))
+        .collect();
     Kill {
         kill_id: kill_id,
         victim_ship_type_id: victim_ship_type_id,
@@ -95,16 +101,26 @@ fn kill(kill: &BTreeMap<String, Json>) -> Kill {
 
 fn item(item: &BTreeMap<String, Json>) -> Item {
     let type_id = item.get("typeID")
-                      .expect("Could not read type_id")
-                      .as_u64()
-                      .expect("type_id not u64");
+        .expect("Could not read type_id")
+        .as_u64()
+        .expect("type_id not u64");
     let flag = item.get("flag")
-                   .expect("Could not read flag")
-                   .as_u64()
-                   .expect("flag not u64");
+        .expect("Could not read flag")
+        .as_u64()
+        .expect("flag not u64");
+    let quantity_dropped = item.get("qtyDropped")
+        .expect("Could not read quantity_dropped")
+        .as_u64()
+        .expect("quantity_dropped not u64");
+    let quantity_destroyed = item.get("qtyDestroyed")
+        .expect("Could not read quantity_destroyed")
+        .as_u64()
+        .expect("quantity_destroyed not u64");
     Item {
         type_id: type_id,
         flag: flag,
+        quantity_dropped: quantity_dropped,
+        quantity_destroyed: quantity_destroyed,
     }
 }
 
