@@ -54,6 +54,7 @@ pub enum ZkillRequestType {
 }
 
 /// The parameters for one request to zKillboard.
+#[derive(Debug)]
 pub struct ZkillRequest {
     alliance_id: u64,
     request_type: ZkillRequestType,
