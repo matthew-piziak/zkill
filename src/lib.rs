@@ -23,9 +23,11 @@ pub enum ZkillRequestType {
 pub struct ZkillRequest {
     alliance_id: u64,
     request_type: ZkillRequestType,
+    start_time: String,
+    page: u64,
 }
 
-pub fn kills(request: ZkillRequest) -> Vec<Kill>{
+pub fn kills(request: ZkillRequest) -> Vec<Kill> {
     use std::io::prelude::*;
 
     let client = Client::new();
@@ -63,10 +65,12 @@ fn kill(kill: &BTreeMap<String, Json>) -> Kill {
 }
 
 impl ZkillRequest {
-    pub fn new(alliance_id: u64, request_type: ZkillRequestType) -> Self {
+    pub fn new(alliance_id: u64, request_type: ZkillRequestType, start_time: String, page: u64) -> Self {
         ZkillRequest {
             alliance_id: alliance_id,
             request_type: request_type,
+            start_time: String,
+            page: u64,
         }
     }
 
