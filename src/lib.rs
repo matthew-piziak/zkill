@@ -127,7 +127,11 @@ fn item(item: &BTreeMap<String, Json>) -> Item {
 }
 
 impl ZkillRequest {
-    pub fn new(alliance_id: u64, request_type: ZkillRequestType, start_time: String, page: u64) -> Self {
+    pub fn new(alliance_id: u64,
+               request_type: ZkillRequestType,
+               start_time: String,
+               page: u64)
+               -> Self {
         ZkillRequest {
             alliance_id: alliance_id,
             request_type: request_type,
@@ -140,12 +144,14 @@ impl ZkillRequest {
     pub fn endpoint(&self) -> String {
         use ZkillRequestType::*;
 
-        format!("https://zkillboard.com/api/allianceID/{}{}",
+        format!("https://zkillboard.com/api/allianceID/{}{}/startTime/{}/page/{}",
                 self.alliance_id,
                 match self.request_type {
                     Kills => "/kills",
                     Losses => "/losses",
                     Both => "/kills/losses",
-                })
+                },
+                self.start_time,
+                self.page)
     }
 }
