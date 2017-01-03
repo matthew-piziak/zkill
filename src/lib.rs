@@ -62,7 +62,7 @@ pub struct ZkillRequest {
 }
 
 /// Retrieves kills from zKillboard according to the parameters of the request.
-pub fn kills(request: ZkillRequest) -> Vec<Kill> {
+pub fn kills(request: ZkillRequest) -> Option<Vec<Kill>> {
     use std::io::prelude::*;
 
     let client = Client::new();
@@ -70,8 +70,11 @@ pub fn kills(request: ZkillRequest) -> Vec<Kill> {
     let mut response_string = String::new();
     response.read_to_string(&mut response_string).expect("Could not read response");
     let json = Json::from_str(&response_string).expect("Could not parse into JSON");
-    let kills = json.as_array().expect("Could not read as array");
-    kills.iter().map(|k| kill(k.as_object().expect("Could not read as object"))).collect()
+    let kills = json.as_array();
+    if kills.is_none() {
+        return None;
+    }
+    Some(kills.unwrap().iter().map(|k| kill(k.as_object().expect("Could not read as object"))).collect())
 }
 
 fn kill(kill: &BTreeMap<String, Json>) -> Kill {
