@@ -65,12 +65,14 @@ pub struct ZkillRequest {
 pub fn kills(request: ZkillRequest) -> Option<Vec<Kill>> {
     use std::io::prelude::*;
 
+    println!("request: {:?}", request);
     let client = Client::new();
     let mut response = client.get(&request.endpoint()).send().expect("Could not read API");
     let mut response_string = String::new();
     response.read_to_string(&mut response_string).expect("Could not read response");
     let json = Json::from_str(&response_string).expect("Could not parse into JSON");
     let kills = json.as_array();
+    println!("kills: {:?}", kills);
     if kills.is_none() {
         return None;
     }
