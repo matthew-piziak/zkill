@@ -42,6 +42,7 @@ pub struct Item {
 
 /// Defines whether the zKillboard request should be for the alliance's kills,
 /// losses, or both.
+#[derive(Debug)]
 pub enum ZkillRequestType {
     /// Retrieve records where the alliance killed a ship.
     Kills,
